@@ -13,7 +13,7 @@ data class Notification(
     val author: String,
     val groups: List<Groups>,
     val createdAt: LocalDateTime = LocalDateTime.now(),
-    val updatedeAt: LocalDateTime = LocalDateTime.now(),
+    val updatedAt: LocalDateTime = LocalDateTime.now(),
 
     @Id
     val id: String = UUID.randomUUID().toString(),

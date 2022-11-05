@@ -8,6 +8,5 @@ class NotificationResponse(
     val description: String,
     val html: String?,
     val createdAt: LocalDateTime,
-    val updatedeAt: LocalDateTime
+    val updatedAt: LocalDateTime
 )
-
