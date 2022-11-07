@@ -61,38 +61,41 @@ class NotificationControllerTest {
         )
     }
 
+    private fun createNotificationMock() = Notification(
+        id = "0cc17163-cd1e-4b8a-b708-66f94644e96a",
+        title = "Criando um mock de Notification",
+        description = "Teste Unitário com JUnit5",
+        html = "<body><p>Esse é um teste unitário de criação de Notifications</p></body>",
+        author = "ovnny",
+        pinned = true,
+        active = true,
+        priority = "high",
+        groups = listOf(Groups("1", "Admin")),
+        updatedAt = LocalDateTime.of(2022, 11, 4, 12, 35, 45, 59),
+        createdAt = LocalDateTime.of(2022, 11, 4, 12, 35, 45, 59)
+    )
 
-    private fun createNotificationMock(): Notification {
-        return Notification(
-            title = "Criando um mock de Notification",
-            description = "Teste Unitário com JUnit5",
-            html = "<body><p>Esse é um teste unitário de criação de Notifications</p></body>",
-            author = "ovnny",
-            groups = listOf(Groups("1", "Admin")),
-            updatedAt = LocalDateTime.of(2022, 11, 4, 12, 35, 45, 59),
-            createdAt = LocalDateTime.of(2022, 11, 4, 12, 35, 45, 59)
-        )
-    }
+    private fun createRequestNotificationMock() = NotificationRequest(
+        title = "Criando um mock de Notification",
+        description = "Teste Unitário com JUnit5",
+        html = "<body><p>Esse é um teste unitário de criação de Notifications</p></body>",
+        author = "ovnny",
+        pinned = true,
+        active = true,
+        priority = "high",
+        groups = listOf(Groups("1", "Admin"))
+    )
 
-    private fun createRequestNotificationMock(): NotificationRequest {
-        return NotificationRequest(
-            title = "Criando um mock de Notification",
-            description = "Teste Unitário com JUnit5",
-            html = "<body><p>Esse é um teste unitário de criação de Notifications</p></body>",
-            author = "ovnny",
-            groups = listOf(Groups("1", "Admin"))
-        )
-    }
-
-    private fun createResponseNotificationMock(): NotificationResponse {
-        return NotificationResponse(
-            id = createNotificationMock().id,
-            title = "Criando um mock de Notification",
-            description = "Teste Unitário com JUnit5",
-            html = "<body><p>Esse é um teste unitário de criação de Notifications</p></body>",
-            updatedAt = LocalDateTime.of(2022, 11, 4, 12, 35, 45, 59),
-            createdAt = LocalDateTime.of(2022, 11, 4, 12, 35, 45, 59)
-
-        )
-    }
+    private fun createResponseNotificationMock() = NotificationResponse(
+        id = createNotificationMock().id.toString(),
+        title = "Criando um mock de Notification",
+        description = "Teste Unitário com JUnit5",
+        html = "<body><p>Esse é um teste unitário de criação de Notifications</p></body>",
+        author = null,
+        pinned = true,
+        active = true,
+        priority = "high",
+        updatedAt = LocalDateTime.of(2022, 11, 4, 12, 35, 45, 59),
+        createdAt = LocalDateTime.of(2022, 11, 4, 12, 35, 45, 59)
+    )
 }

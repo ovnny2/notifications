@@ -7,6 +7,10 @@ class NotificationResponse(
     val title: String,
     val description: String,
     val html: String?,
-    val createdAt: LocalDateTime,
+    val author: String? = null,
+    val pinned: Boolean?,
+    val active: Boolean?,
+    val priority: String?,
+    val createdAt: LocalDateTime?,
     val updatedAt: LocalDateTime
 )

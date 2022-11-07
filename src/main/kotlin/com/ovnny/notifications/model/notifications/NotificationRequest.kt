@@ -2,17 +2,24 @@ package com.ovnny.notifications.model.notifications
 
 import org.springframework.validation.annotation.Validated
 import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotEmpty
+import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
 
 @Validated
 data class NotificationRequest(
-    @NotBlank @Size(max = 64)
+    @get:NotBlank @get:Size(max = 64)
     val title: String,
-    @NotBlank @Size(max = 256)
+    @get:NotBlank @get:Size(max = 256)
     val description: String,
     val html: String?,
-    @NotBlank @Size(max = 32)
+    @get:NotBlank @get:Size(max = 32)
     val author: String,
-    @NotBlank @Size(min = 1)
-    val groups: List<Groups>
+    @get:NotBlank
+    val pinned: Boolean,
+    val active: Boolean? = false,
+    @get:NotBlank @get:Pattern(regexp = "high|medium|low")
+    val priority: String,
+    @get:NotEmpty
+    val groups: List<Groups>,
 )
