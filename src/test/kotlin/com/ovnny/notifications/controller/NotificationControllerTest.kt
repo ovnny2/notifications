@@ -62,7 +62,6 @@ class NotificationControllerTest {
     }
 
     private fun createNotificationMock() = Notification(
-        id = "0cc17163-cd1e-4b8a-b708-66f94644e96a",
         title = "Criando um mock de Notification",
         description = "Teste Unitário com JUnit5",
         html = "<body><p>Esse é um teste unitário de criação de Notifications</p></body>",
@@ -71,8 +70,8 @@ class NotificationControllerTest {
         active = true,
         priority = "high",
         groups = listOf(Groups("1", "Admin")),
-        updatedAt = LocalDateTime.of(2022, 11, 4, 12, 35, 45, 59),
-        createdAt = LocalDateTime.of(2022, 11, 4, 12, 35, 45, 59)
+        createdAt = LocalDateTime.of(2022, 11, 4, 12, 35, 45, 59),
+        updatedAt = LocalDateTime.of(2022, 11, 4, 12, 35, 45, 59)
     )
 
     private fun createRequestNotificationMock() = NotificationRequest(
@@ -87,7 +86,7 @@ class NotificationControllerTest {
     )
 
     private fun createResponseNotificationMock() = NotificationResponse(
-        id = createNotificationMock().id.toString(),
+        id = createNotificationMock().id,
         title = "Criando um mock de Notification",
         description = "Teste Unitário com JUnit5",
         html = "<body><p>Esse é um teste unitário de criação de Notifications</p></body>",

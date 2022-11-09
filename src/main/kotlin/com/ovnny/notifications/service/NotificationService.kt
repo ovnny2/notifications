@@ -7,9 +7,7 @@ import com.ovnny.notifications.model.notifications.NotificationRequest
 import com.ovnny.notifications.model.notifications.NotificationResponse
 import com.ovnny.notifications.repository.NotificationRepository
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import javax.transaction.Transactional
-import javax.validation.Valid
 
 @Service
 class NotificationService(
@@ -17,8 +15,7 @@ class NotificationService(
 ) {
 
     fun getNotification(id: String): Notification {
-        return repository.findById(id).orElseThrow { NotificationNotFoundException() }
-            .copy()
+        return repository.findById(id).orElseThrow { NotificationNotFoundException() }.copy()
     }
 
     fun getAllNotifications(): List<NotificationResponse> {
@@ -32,18 +29,28 @@ class NotificationService(
     }
 
     @Transactional
-    fun updateExistingNotification(alterations: Notification): NotificationResponse? {
+    fun updateExistingNotification(id: String, alterations: NotificationRequest): NotificationResponse? {
+        val original = repository.findById(id).orElseThrow { NotificationNotFoundException() }
 
-        val original = repository.findById(alterations.id as String).orElseThrow { NotificationNotFoundException() }
+        val updates = original.copy(
+            title = alterations.title,
+            description = alterations.description,
+            html = alterations.html,
+            author = original.author,
+            pinned = alterations.pinned,
+            active = original.active,
+            priority = alterations.priority,
+            groups = alterations.groups,
+            createdAt = original.createdAt
+        )
 
-        original
-            .apply { active to false }
-            .apply { updatedAt to LocalDateTime.now() }
-            .also { repository.save(it) }
+        repository.delete(original)
+        repository.save(updates)
 
-        return toResponse(alterations)
+        return toResponse(updates)
     }
 
+    @Transactional
     fun deleteNotification(id: String): String? {
         val notification = repository.findById(id).orElseThrow { NotificationNotFoundException() }
         if (notification.active) throw NotificationConflitOnDeletionException()
@@ -59,44 +66,50 @@ class NotificationService(
     }
 
     @Transactional
-    fun disableNotification(id: String): String? {
+    fun notificationToggleActive(id: String): String? {
+
         runCatching {
 
             val notification = repository.findById(id).get()
-            val notificationCopy = notification.copy(active = false)
+            val newState = !notification.active
+            val notificationCopy = notification.copy(active = newState)
             repository.delete(notification)
             repository.save(notificationCopy)
 
-            val disableConfirmation = object {
-                val message = "A notificação $id foi desativada com sucesso"
+            val alterationConfirmation = object {
+                val message: String = """O status da notificação de id=${notification.id} 
+                     mudou de ${notification.active} para ${notificationCopy.active}""".trimMargin()
             }
 
-            return disableConfirmation.message
+            return alterationConfirmation.message
 
         }.getOrElse { throw NotificationNotFoundException() }
     }
 
-    fun toModel(@Valid request: NotificationRequest) = Notification(
-        title = request.title,
-        description = request.description,
-        html = request.html,
-        author = request.author,
-        pinned = request.pinned,
-        active = request.active ?: false,
-        priority = request.priority,
-        groups = request.groups
-    )
+    fun toModel(request: NotificationRequest): Notification {
+        return Notification(
+            title = request.title,
+            description = request.description,
+            html = request.html,
+            author = request.author,
+            pinned = request.pinned,
+            active = request.active,
+            priority = request.priority,
+            groups = request.groups
+        )
+    }
+
 
     fun toResponse(notification: Notification) = NotificationResponse(
-        notification.id!!,
-        notification.title,
-        notification.description,
-        notification.html,
-        notification.author,
-        notification.pinned,
-        notification.active,
-        notification.priority,
-        notification.createdAt,
-        notification.updatedAt
+        id = notification.id,
+        title = notification.title,
+        description = notification.description,
+        html = notification.html,
+        author = notification.author,
+        pinned = notification.pinned,
+        active = notification.active,
+        priority = notification.priority,
+        createdAt = notification.createdAt,
+        updatedAt = notification.updatedAt
     )
 }
