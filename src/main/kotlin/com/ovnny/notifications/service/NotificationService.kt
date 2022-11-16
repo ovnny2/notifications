@@ -2,10 +2,11 @@ package com.ovnny.notifications.service
 
 import com.ovnny.notifications.exception.NotificationConflitOnDeletionException
 import com.ovnny.notifications.exception.NotificationNotFoundException
-import com.ovnny.notifications.model.notifications.Notification
-import com.ovnny.notifications.model.notifications.NotificationRequest
-import com.ovnny.notifications.model.notifications.NotificationResponse
+import com.ovnny.notifications.model.notification.Notification
+import com.ovnny.notifications.model.notification.NotificationRequest
+import com.ovnny.notifications.model.notification.NotificationResponse
 import com.ovnny.notifications.repository.NotificationRepository
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
@@ -14,8 +15,13 @@ class NotificationService(
     val repository: NotificationRepository,
 ) {
 
+    @Transactional
+    fun createNotification(notification: Notification) {
+        repository.save(notification)
+    }
+
     fun getNotification(id: String): Notification {
-        return repository.findById(id).orElseThrow { NotificationNotFoundException() }.copy()
+        return repository.findById(id).orElseThrow { NotificationNotFoundException("", HttpStatus.NOT_FOUND) }.copy()
     }
 
     fun getAllNotifications(): List<NotificationResponse> {
@@ -24,13 +30,27 @@ class NotificationService(
     }
 
     @Transactional
-    fun createNotification(notification: Notification) {
-        repository.save(notification)
+    fun notificationStateToggle(id: String): String {
+
+        val notification = repository.findById(id).orElseThrow {
+            NotificationNotFoundException("", HttpStatus.NOT_FOUND)
+        }
+
+        val newState = !notification.active
+        val notificationCopy = notification.copy(active = newState)
+        repository.delete(notification)
+        repository.save(notificationCopy)
+
+        val response = object {
+            val successStateChange = "the notification ${notificationCopy.id} state has changed to $newState"
+        }
+
+        return response.successStateChange
     }
 
     @Transactional
     fun updateExistingNotification(id: String, alterations: NotificationRequest): NotificationResponse? {
-        val original = repository.findById(id).orElseThrow { NotificationNotFoundException() }
+        val original = repository.findById(id).orElseThrow { NotificationNotFoundException("", HttpStatus.NOT_FOUND) }
 
         val updates = original.copy(
             title = alterations.title,
@@ -52,38 +72,22 @@ class NotificationService(
 
     @Transactional
     fun deleteNotification(id: String): String? {
-        val notification = repository.findById(id).orElseThrow { NotificationNotFoundException() }
-        if (notification.active) throw NotificationConflitOnDeletionException()
+        val notification = repository.findById(id).orElseThrow {
+            NotificationNotFoundException(
+                "A menssagem de id=$id não foi encontrada em nossos sistemas", HttpStatus.NOT_FOUND
+            )
+        }
+
+        if (notification.active) throw NotificationConflitOnDeletionException("", HttpStatus.UNPROCESSABLE_ENTITY)
 
         repository.delete(notification)
 
         val deletionConfirmation = object {
-            val message = """notificação de 'id' ${notification.id} 
-            criada por ${notification.author} foi deletada com sucesso"""".trimMargin()
+            val message = """notificação de id=${notification.id} 
+            criada por ${notification.author} foi deletada com sucesso"""".trimIndent()
         }
 
         return deletionConfirmation.message
-    }
-
-    @Transactional
-    fun notificationToggleActive(id: String): String? {
-
-        runCatching {
-
-            val notification = repository.findById(id).get()
-            val newState = !notification.active
-            val notificationCopy = notification.copy(active = newState)
-            repository.delete(notification)
-            repository.save(notificationCopy)
-
-            val alterationConfirmation = object {
-                val message: String = """O status da notificação de id=${notification.id} 
-                     mudou de ${notification.active} para ${notificationCopy.active}""".trimMargin()
-            }
-
-            return alterationConfirmation.message
-
-        }.getOrElse { throw NotificationNotFoundException() }
     }
 
     fun toModel(request: NotificationRequest): Notification {
@@ -98,7 +102,6 @@ class NotificationService(
             groups = request.groups
         )
     }
-
 
     fun toResponse(notification: Notification) = NotificationResponse(
         id = notification.id,

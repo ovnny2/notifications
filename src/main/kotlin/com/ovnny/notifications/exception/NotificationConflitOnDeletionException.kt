@@ -1,7 +1,5 @@
 package com.ovnny.notifications.exception
 
-import java.lang.IllegalArgumentException
+import org.springframework.http.HttpStatus
 
-class NotificationConflitOnDeletionException(
-    msg: String? = "O status da notificação está ativa e portanto não pode ser deletada"
-) : IllegalArgumentException(msg)
+class NotificationConflitOnDeletionException(message: String?, status: HttpStatus) : IllegalStateException(message)

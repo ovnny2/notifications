@@ -1,4 +1,4 @@
-package com.ovnny.notifications.model.notifications
+package com.ovnny.notifications.model.notification
 
 import java.time.LocalDateTime
 

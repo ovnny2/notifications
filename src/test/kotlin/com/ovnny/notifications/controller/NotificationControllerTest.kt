@@ -1,10 +1,10 @@
 package com.ovnny.notifications.controller
 
 import com.ovnny.notifications.exception.NotificationNotFoundException
-import com.ovnny.notifications.model.notifications.Groups
-import com.ovnny.notifications.model.notifications.Notification
-import com.ovnny.notifications.model.notifications.NotificationRequest
-import com.ovnny.notifications.model.notifications.NotificationResponse
+import com.ovnny.notifications.model.notification.Groups
+import com.ovnny.notifications.model.notification.Notification
+import com.ovnny.notifications.model.notification.NotificationRequest
+import com.ovnny.notifications.model.notification.NotificationResponse
 import com.ovnny.notifications.service.NotificationService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
@@ -47,7 +47,7 @@ class NotificationControllerTest {
 
     @Test
     fun `should return NotificationNotFoundException for invalids notificationIds with status 404 NOT_FOUND`() {
-        val exceptionMock = NotificationNotFoundException()
+        val exceptionMock = NotificationNotFoundException("", HttpStatus.NOT_FOUND)
 
         `when`(notificationService.getNotification(anyString())).thenThrow(exceptionMock)
 

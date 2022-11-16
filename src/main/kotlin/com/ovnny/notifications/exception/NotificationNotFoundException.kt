@@ -1,5 +1,7 @@
 package com.ovnny.notifications.exception
 
+import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpClientErrorException.NotFound
+
 class NotificationNotFoundException(
-    msg: String? = "O id da notificação informada está incorreta ou não existe"
-) : IllegalArgumentException(msg)
+    override val message: String, status: HttpStatus) : NoSuchElementException(message)

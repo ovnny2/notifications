@@ -1,8 +1,8 @@
 package com.ovnny.notifications.controller
 
-import com.ovnny.notifications.model.notifications.Notification
-import com.ovnny.notifications.model.notifications.NotificationRequest
-import com.ovnny.notifications.model.notifications.NotificationResponse
+import com.ovnny.notifications.model.notification.Notification
+import com.ovnny.notifications.model.notification.NotificationRequest
+import com.ovnny.notifications.model.notification.NotificationResponse
 import com.ovnny.notifications.service.NotificationService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -48,7 +48,7 @@ class NotificationController(
     @Transactional
     @PatchMapping("/api/v1/notifications/{id}")
     fun patchNotification(@PathVariable(value = "id") @Valid id: String): ResponseEntity<String> {
-        return ResponseEntity.accepted().body(notificationService.notificationToggleActive(id))
+        return ResponseEntity.accepted().body(notificationService.notificationStateToggle(id))
     }
 
     @Transactional
