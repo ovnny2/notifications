@@ -2,6 +2,7 @@ package com.ovnny.notifications.service
 
 import com.ovnny.notifications.exception.NotificationConflitOnDeletionException
 import com.ovnny.notifications.exception.NotificationNotFoundException
+import com.ovnny.notifications.exception.msg.NotificationMessages
 import com.ovnny.notifications.model.notification.Notification
 import com.ovnny.notifications.model.notification.NotificationRequest
 import com.ovnny.notifications.model.notification.NotificationResponse
@@ -20,8 +21,10 @@ class NotificationService(
         repository.save(notification)
     }
 
-    fun getNotification(id: String): Notification {
-        return repository.findById(id).orElseThrow { NotificationNotFoundException("", HttpStatus.NOT_FOUND) }.copy()
+    fun getNotification(id: String): Notification? {
+        return repository.findById(id).orElseThrow {
+            NotificationNotFoundException(NotificationMessages.NOT_FOUND_MESSAGE.msg, HttpStatus.NOT_FOUND)
+        }.copy()
     }
 
     fun getAllNotifications(): List<NotificationResponse> {
@@ -50,7 +53,9 @@ class NotificationService(
 
     @Transactional
     fun updateExistingNotification(id: String, alterations: NotificationRequest): NotificationResponse? {
-        val original = repository.findById(id).orElseThrow { NotificationNotFoundException("", HttpStatus.NOT_FOUND) }
+        val original = repository.findById(id).orElseThrow {
+            NotificationNotFoundException(NotificationMessages.NOT_FOUND_MESSAGE.msg, HttpStatus.NOT_FOUND)
+        }
 
         val updates = original.copy(
             title = alterations.title,
