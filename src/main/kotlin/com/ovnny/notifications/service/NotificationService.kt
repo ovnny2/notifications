@@ -2,13 +2,12 @@ package com.ovnny.notifications.service
 
 import com.ovnny.notifications.exception.NotificationConflitOnDeletionException
 import com.ovnny.notifications.exception.NotificationNotFoundException
-import com.ovnny.notifications.exception.msg.NotificationMessages.*
+import com.ovnny.notifications.exception.msg.NotificationMessages.NOT_FOUND_MESSAGE
 import com.ovnny.notifications.model.notification.Notification
 import com.ovnny.notifications.model.notification.NotificationRequest
 import com.ovnny.notifications.model.notification.NotificationResponse
 import com.ovnny.notifications.repository.NotificationRepository
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
@@ -89,12 +88,13 @@ class NotificationService(
 
         repository.delete(notification)
 
-        val deletionConfirmation = object {
-            val message = """notificação de id=${notification.id} 
-            criada por ${notification.author} foi deletada com sucesso"""".trimIndent()
+        val deletionMessage = object {
+            val message = "Notification of id=${notification.id} \\" +
+                    "created by ${notification.author} \\" +
+                    "was succesfully deleted.".trimIndent()
         }
 
-        return deletionConfirmation.message
+        return deletionMessage.message
     }
 
     fun toModel(request: NotificationRequest): Notification {
@@ -110,6 +110,7 @@ class NotificationService(
         )
     }
 
+    @Suppress("CAST_NEVER_SUCCEEDS")
     fun toResponse(notification: Notification): NotificationResponse {
         return notification.copy() as NotificationResponse
     }
