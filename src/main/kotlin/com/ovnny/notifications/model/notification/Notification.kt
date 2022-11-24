@@ -19,10 +19,7 @@ data class Notification(
     val groups: List<Groups>,
     val createdAt: LocalDateTime? = LocalDateTime.now(),
     val updatedAt: LocalDateTime = LocalDateTime.now(),
-
 )
-
-
 
 data class Groups(
     val id: String,

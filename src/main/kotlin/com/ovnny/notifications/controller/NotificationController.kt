@@ -1,7 +1,5 @@
 package com.ovnny.notifications.controller
 
-import com.ovnny.notifications.exception.NotificationNotFoundException
-import com.ovnny.notifications.exception.msg.NotificationMessages
 import com.ovnny.notifications.model.notification.Notification
 import com.ovnny.notifications.model.notification.NotificationRequest
 import com.ovnny.notifications.model.notification.NotificationResponse
@@ -42,7 +40,7 @@ class NotificationController(
     @PutMapping("/api/v1/notifications/{id}")
     fun updateNotification(
         @PathVariable(value = "id") @Valid id: String,
-        @RequestBody @Valid request: NotificationRequest
+        @RequestBody @Valid request: NotificationRequest,
     ): ResponseEntity<NotificationResponse?> {
         return ResponseEntity.ok().body(notificationService.updateExistingNotification(id, request))
     }
