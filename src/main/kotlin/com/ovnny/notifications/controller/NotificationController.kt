@@ -15,6 +15,16 @@ class NotificationController(
     val notificationService: NotificationService,
 ) {
 
+    @Transactional
+    @PostMapping("/api/v1/notifications")
+    fun createNotification(@RequestBody @Valid request: NotificationRequest): ResponseEntity<NotificationResponse> {
+        val notification = notificationService.toModel(request)
+        notificationService.createNotification(notification)
+
+        val location = URI.create("api/v1/notifications/${notification.id}")
+        return ResponseEntity.created(location).body(notificationService.toResponse(notification))
+    }
+
     @GetMapping("/api/v1/notifications/{id}")
     fun getNotification(@PathVariable(value = "id") @Valid id: String): ResponseEntity<Notification?> {
         val notificationResponse = notificationService.getNotification(id)
@@ -24,16 +34,6 @@ class NotificationController(
     @GetMapping("/api/v1/notifications")
     fun getAllNotifications(): ResponseEntity<List<NotificationResponse?>> {
         return ResponseEntity.ok().body(notificationService.getAllNotifications())
-    }
-
-    @Transactional
-    @PostMapping("/api/v1/notifications")
-    fun createNotification(@RequestBody @Valid request: NotificationRequest): ResponseEntity<NotificationResponse> {
-        val notification = notificationService.toModel(request)
-        notificationService.createNotification(notification)
-
-        val location = URI.create("api/v1/notifications/${notification.id}")
-        return ResponseEntity.created(location).body(notificationService.toResponse(notification))
     }
 
     @Transactional
