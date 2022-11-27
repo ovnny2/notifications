@@ -2,8 +2,9 @@ package com.ovnny.notifications.service
 
 import com.ovnny.notifications.exception.NotificationConflitOnDeletionException
 import com.ovnny.notifications.exception.NotificationNotFoundException
-import com.ovnny.notifications.exception.msg.NotificationMessages.NOT_FOUND_MESSAGE
+import com.ovnny.notifications.exception.msg.NotificationMessages
 import com.ovnny.notifications.model.notification.Notification
+import com.ovnny.notifications.model.notification.NotificationInfo
 import com.ovnny.notifications.model.notification.NotificationRequest
 import com.ovnny.notifications.model.notification.NotificationResponse
 import com.ovnny.notifications.repository.NotificationRepository
@@ -17,14 +18,17 @@ class NotificationService(
 ) {
 
     @Transactional
-    fun createNotification(notification: Notification) {
+    fun createNotification(request: NotificationRequest): NotificationResponse {
+        val notification = toModel(request)
         repository.save(notification)
+
+        return toResponse(notification)
     }
 
-    fun getNotification(id: String): Notification? {
-        return repository.findById(id)
-            .orElseThrow { NotificationNotFoundException(NOT_FOUND_MESSAGE.msg, HttpStatus.NOT_FOUND) }
-            .copy()
+    fun getNotificationById(id: String): Notification {
+        return repository.findById(id).orElseThrow {
+            NotificationNotFoundException(NotificationMessages.NOT_FOUND_MESSAGE.msg, HttpStatus.NOT_FOUND)
+        }
     }
 
     fun getAllNotifications(): List<NotificationResponse> {
@@ -35,66 +39,66 @@ class NotificationService(
     @Transactional
     fun notificationStateToggle(id: String): String {
 
-        val notification = repository.findById(id)
-            .orElseThrow { NotificationNotFoundException(NOT_FOUND_MESSAGE.msg, HttpStatus.NOT_FOUND) }
-
-        val notificationNewState = notification.copy(active = !notification.active)
-        repository.delete(notification)
-        repository.save(notificationNewState)
-
-        val response = object {
-            val turnedNotificationState = "the notification's state has changed from: \\ " +
-                    "active: ${notification.active} :: [ old ] to\\" +
-                    "active: ${notificationNewState.active} :: [ new ]"
+        val notification = repository.findById(id).orElseThrow {
+            NotificationNotFoundException(NotificationMessages.NOT_FOUND_MESSAGE.msg, HttpStatus.NOT_FOUND)
         }
 
-        return response.turnedNotificationState
+        val updatedNotificationStatus = notification.status.copy(
+            active = !notification.status.active
+        )
+
+        val newNotification = repository.save(
+            notification.copy(
+                status = updatedNotificationStatus
+            )
+        )
+
+        return when (newNotification.status.active) {
+            true -> "A notificação foi ativada com sucesso"
+            else -> "A notificação foi desativada com sucesso"
+        }
     }
 
     @Transactional
-    fun updateExistingNotification(id: String, updated: NotificationRequest): NotificationResponse? {
+    fun updateExistingNotification(id: String, updateRequest: NotificationRequest): NotificationResponse? {
 
-        val original = repository.findById(id)
-            .orElseThrow { NotificationNotFoundException(NOT_FOUND_MESSAGE.msg, HttpStatus.NOT_FOUND) }
+        val original = repository.findById(id).orElseThrow {
+            NotificationNotFoundException(NotificationMessages.NOT_FOUND_MESSAGE.msg, HttpStatus.NOT_FOUND)
+        }
 
-        val updates = original.copy(
-            title = updated.title,
-            description = updated.description,
-            html = updated.html,
-            author = original.author,
-            pinned = updated.pinned,
-            active = original.active,
-            priority = updated.priority,
-            groups = updated.groups,
-            createdAt = original.createdAt
+        val updates = Notification(
+            title = updateRequest.title,
+            description = updateRequest.description,
+            html = updateRequest.html,
+            status = NotificationInfo(
+                author = updateRequest.author,
+                pinned = updateRequest.pinned!!,
+                active = updateRequest.active,
+                priority = updateRequest.priority,
+                groups = updateRequest.groups,
+                parentId = id
+            )
         )
 
-        repository.delete(original)
+        repository.save(original)
         repository.save(updates)
 
         return toResponse(updates)
     }
 
     @Transactional
-    fun deleteNotification(id: String): String? {
-        val notification = repository.findById(id)
-            .orElseThrow { NotificationNotFoundException(NOT_FOUND_MESSAGE.msg, HttpStatus.NOT_FOUND) }
-
-        if (notification.active)
-            throw NotificationConflitOnDeletionException(
-                "Operation Failed: Is not possible to delete an active notification. \\" +
-                        "You must turn it off to proceed deletion", HttpStatus.UNPROCESSABLE_ENTITY
-            )
-
-        repository.delete(notification)
-
-        val deletionMessage = object {
-            val message = "Notification of id=${notification.id} \\" +
-                    "created by ${notification.author} \\" +
-                    "was succesfully deleted.".trimIndent()
+    fun deleteNotification(id: String) {
+        val notification = repository.findById(id).orElseThrow {
+            NotificationNotFoundException(NotificationMessages.NOT_FOUND_MESSAGE.msg, HttpStatus.NOT_FOUND)
         }
 
-        return deletionMessage.message
+        takeIf {
+            notification.status.parentId?.isEmpty() ?: throw NotificationConflitOnDeletionException(
+                NotificationMessages.RULE_BUSINESS_BROKEN_MESSAGE.msg,
+                HttpStatus.METHOD_NOT_ALLOWED
+            )
+
+        }.apply { repository.delete(notification) }
     }
 
     fun toModel(request: NotificationRequest): Notification {
@@ -102,16 +106,30 @@ class NotificationService(
             title = request.title,
             description = request.description,
             html = request.html,
-            author = request.author,
-            pinned = request.pinned,
-            active = request.active,
-            priority = request.priority,
-            groups = request.groups
+            status = NotificationInfo(
+                parentId = null,
+                priority = request.priority,
+                active = request.active,
+                pinned = request.pinned ?: false,
+                author = request.author,
+                groups = request.groups
+            )
         )
     }
 
-    @Suppress("CAST_NEVER_SUCCEEDS")
     fun toResponse(notification: Notification): NotificationResponse {
-        return notification.copy() as NotificationResponse
+        return NotificationResponse(
+            id = notification.id,
+            title = notification.title,
+            description = notification.description,
+            html = notification.html,
+            author = notification.status.author,
+            pinned = notification.status.pinned,
+            active = notification.status.active,
+            priority = notification.status.priority,
+            createdAt = notification.createdAt!!,
+            lastUpdate = notification.updatedAt!!,
+            parentId = notification.status.parentId
+        )
     }
 }

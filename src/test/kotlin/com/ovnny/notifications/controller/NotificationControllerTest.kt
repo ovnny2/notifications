@@ -1,10 +1,7 @@
 package com.ovnny.notifications.controller
 
 import com.ovnny.notifications.exception.NotificationNotFoundException
-import com.ovnny.notifications.model.notification.Groups
-import com.ovnny.notifications.model.notification.Notification
-import com.ovnny.notifications.model.notification.NotificationRequest
-import com.ovnny.notifications.model.notification.NotificationResponse
+import com.ovnny.notifications.model.notification.*
 import com.ovnny.notifications.service.NotificationService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
@@ -29,19 +26,19 @@ class NotificationControllerTest {
     @Test
     fun `should return a new notification with status OK`() {
         val request = createRequestNotificationMock()
-
         val notification = createNotificationMock()
 
-        val notificationResponse = createResponseNotificationMock()
+        val responseMock = createResponseNotificationMock(notification)
 
-        `when`(notificationService.toModel(request)).thenReturn(notification)
-        `when`(notificationService.toResponse(notification)).thenReturn(notificationResponse)
+        `when`(notificationService.createNotification(request)).thenReturn(responseMock)
 
         val response = notificationController.createNotification(request)
 
+        val mockResponse = createResponseNotificationMock(notification)
+
         assertAll(
             { assert(response.statusCode == HttpStatus.CREATED) },
-            { assert(response.body!! == notificationResponse) }
+            { assert(response.body!! == mockResponse) }
         )
     }
 
@@ -49,10 +46,10 @@ class NotificationControllerTest {
     fun `should return NotificationNotFoundException for invalids notificationIds with status 404 NOT_FOUND`() {
         val exceptionMock = NotificationNotFoundException("", HttpStatus.NOT_FOUND)
 
-        `when`(notificationService.getNotification(anyString())).thenThrow(exceptionMock)
+        `when`(notificationService.getNotificationById(anyString())).thenThrow(exceptionMock)
 
         val exception = assertThrows<NotificationNotFoundException> {
-            notificationService.getNotification(anyString())
+            notificationService.getNotificationById(anyString())
         }
 
         assertAll(
@@ -65,14 +62,18 @@ class NotificationControllerTest {
         title = "Criando um mock de Notification",
         description = "Teste Unitário com JUnit5",
         html = "<body><p>Esse é um teste unitário de criação de Notifications</p></body>",
-        author = "ovnny",
-        pinned = true,
-        active = true,
-        priority = "high",
-        groups = listOf(Groups("1", "Admin")),
+        status = NotificationInfo(
+            author = "ovnny",
+            pinned = true,
+            active = true,
+            priority = "high",
+            groups = listOf(Groups("1", "Admin")),
+            parentId = null
+        ),
         createdAt = LocalDateTime.of(2022, 11, 4, 12, 35, 45, 59),
-        updatedAt = LocalDateTime.of(2022, 11, 4, 12, 35, 45, 59)
-    )
+        updatedAt = LocalDateTime.of(2022, 11, 4, 12, 35, 45, 59),
+
+        )
 
     private fun createRequestNotificationMock() = NotificationRequest(
         title = "Criando um mock de Notification",
@@ -85,16 +86,17 @@ class NotificationControllerTest {
         groups = listOf(Groups("1", "Admin"))
     )
 
-    private fun createResponseNotificationMock() = NotificationResponse(
-        id = createNotificationMock().id,
-        title = "Criando um mock de Notification",
-        description = "Teste Unitário com JUnit5",
-        html = "<body><p>Esse é um teste unitário de criação de Notifications</p></body>",
+    private fun createResponseNotificationMock(notification: Notification) = NotificationResponse(
+        id = notification.id,
+        title = notification.title,
+        description = notification.description,
+        html = notification.html,
         author = null,
-        pinned = true,
-        active = true,
-        priority = "high",
-        updatedAt = LocalDateTime.of(2022, 11, 4, 12, 35, 45, 59),
-        createdAt = LocalDateTime.of(2022, 11, 4, 12, 35, 45, 59)
+        pinned = notification.status.pinned,
+        active = notification.status.active,
+        priority = notification.status.priority,
+        createdAt = notification.createdAt!!,
+        lastUpdate = notification.createdAt!!,
+        parentId = notification.status.parentId
     )
 }

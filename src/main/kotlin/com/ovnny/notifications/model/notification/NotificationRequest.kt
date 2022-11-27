@@ -15,12 +15,13 @@ data class NotificationRequest(
     @get:NotBlank @get:Size(max = 256)
     val description: String,
 
+    @Size(max = 1024)
     val html: String?,
 
     @get:NotBlank @get:Size(max = 32)
     val author: String,
 
-    val pinned: Boolean,
+    val pinned: Boolean? = false,
 
     @get:NotNull
     val active: Boolean,

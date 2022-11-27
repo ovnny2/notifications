@@ -4,6 +4,7 @@ import com.ovnny.notifications.model.notification.Notification
 import com.ovnny.notifications.model.notification.NotificationRequest
 import com.ovnny.notifications.model.notification.NotificationResponse
 import com.ovnny.notifications.service.NotificationService
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URI
@@ -18,16 +19,15 @@ class NotificationController(
     @Transactional
     @PostMapping("/api/v1/notifications")
     fun createNotification(@RequestBody @Valid request: NotificationRequest): ResponseEntity<NotificationResponse> {
-        val notification = notificationService.toModel(request)
-        notificationService.createNotification(notification)
+        val response = notificationService.createNotification(request)
 
-        val location = URI.create("api/v1/notifications/${notification.id}")
-        return ResponseEntity.created(location).body(notificationService.toResponse(notification))
+        val location = URI.create("api/v1/notifications/${response.id}")
+        return ResponseEntity.created(location).body(response)
     }
 
     @GetMapping("/api/v1/notifications/{id}")
-    fun getNotification(@PathVariable(value = "id") @Valid id: String): ResponseEntity<Notification?> {
-        val notificationResponse = notificationService.getNotification(id)
+    fun getNotification(@PathVariable(value = "id") @Valid id: String): ResponseEntity<Notification> {
+        val notificationResponse = notificationService.getNotificationById(id)
         return ResponseEntity.ok().body(notificationResponse)
     }
 
@@ -40,20 +40,20 @@ class NotificationController(
     @PutMapping("/api/v1/notifications/{id}")
     fun updateNotification(
         @PathVariable(value = "id") @Valid id: String,
-        @RequestBody @Valid request: NotificationRequest,
+        @RequestBody @Valid updates: NotificationRequest,
     ): ResponseEntity<NotificationResponse?> {
-        return ResponseEntity.ok().body(notificationService.updateExistingNotification(id, request))
+        return ResponseEntity.ok().body(notificationService.updateExistingNotification(id, updates))
     }
 
     @Transactional
     @PatchMapping("/api/v1/notifications/{id}")
-    fun patchNotification(@PathVariable(value = "id") @Valid id: String): ResponseEntity<String> {
-        return ResponseEntity.accepted().body(notificationService.notificationStateToggle(id))
+    fun toggleNotificationState(@PathVariable(value = "id") @Valid id: String): ResponseEntity<String> {
+        return ResponseEntity.ok().body(notificationService.notificationStateToggle(id))
     }
 
     @Transactional
     @DeleteMapping("/api/v1/notifications/{id}")
     fun deleteNotification(@PathVariable(value = "id") @Valid id: String): ResponseEntity<String> {
-        return ResponseEntity.accepted().body(notificationService.deleteNotification(id))
+        return ResponseEntity.status(HttpStatus.OK).build()
     }
 }
