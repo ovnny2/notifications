@@ -14,19 +14,19 @@ data class Notification(
     val html: String?,
     val status: NotificationInfo,
     val createdAt: LocalDateTime? = LocalDateTime.now(),
-    val updatedAt: LocalDateTime? = LocalDateTime.now(),
+    val updatedAt: LocalDateTime? = LocalDateTime.now()
 )
 
 data class NotificationInfo(
-    val parentId: String? = null,
     val priority: String,
     var active: Boolean,
     val pinned: Boolean,
     val author: String,
     val groups: List<Groups>,
+    val parentId: String? = null
 )
 
 data class Groups(
     val id: String,
-    val name: String,
+    val name: String
 )

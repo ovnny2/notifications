@@ -1,6 +1,5 @@
 package com.ovnny.notifications.service
 
-import com.ovnny.notifications.exception.NotificationConflitOnDeletionException
 import com.ovnny.notifications.exception.NotificationNotFoundException
 import com.ovnny.notifications.exception.msg.NotificationMessages
 import com.ovnny.notifications.model.notification.Notification
@@ -14,7 +13,7 @@ import javax.transaction.Transactional
 
 @Service
 class NotificationService(
-    val repository: NotificationRepository,
+    private val repository: NotificationRepository
 ) {
 
     @Transactional
@@ -43,13 +42,13 @@ class NotificationService(
             NotificationNotFoundException(NotificationMessages.NOT_FOUND_MESSAGE.msg, HttpStatus.NOT_FOUND)
         }
 
-        val updatedNotificationStatus = notification.status.copy(
+        val notificationUpdatedStatus = notification.status.copy(
             active = !notification.status.active
         )
 
         val newNotification = repository.save(
             notification.copy(
-                status = updatedNotificationStatus
+                status = notificationUpdatedStatus
             )
         )
 
@@ -60,7 +59,7 @@ class NotificationService(
     }
 
     @Transactional
-    fun updateExistingNotification(id: String, updateRequest: NotificationRequest): NotificationResponse? {
+    fun updateNotification(id: String, updateRequest: NotificationRequest): NotificationResponse? {
 
         val original = repository.findById(id).orElseThrow {
             NotificationNotFoundException(NotificationMessages.NOT_FOUND_MESSAGE.msg, HttpStatus.NOT_FOUND)
@@ -80,6 +79,8 @@ class NotificationService(
             )
         )
 
+        original.status.active = false
+
         repository.save(original)
         repository.save(updates)
 
@@ -88,17 +89,23 @@ class NotificationService(
 
     @Transactional
     fun deleteNotification(id: String) {
-        val notification = repository.findById(id).orElseThrow {
-            NotificationNotFoundException(NotificationMessages.NOT_FOUND_MESSAGE.msg, HttpStatus.NOT_FOUND)
+
+        val possibleChild = repository.findById(id).orElseThrow {
+            NotificationNotFoundException(
+                NotificationMessages.NOT_FOUND_MESSAGE.msg,
+                HttpStatus.NOT_FOUND
+            )
         }
 
-        takeIf {
-            notification.status.parentId?.isEmpty() ?: throw NotificationConflitOnDeletionException(
-                NotificationMessages.RULE_BUSINESS_BROKEN_MESSAGE.msg,
-                HttpStatus.METHOD_NOT_ALLOWED
-            )
+        val idList = mutableListOf<String>()
+        idList.add(possibleChild.id)
 
-        }.apply { repository.delete(notification) }
+        val history = repository.findAllByStatusParentId(id)
+        for (not in history) idList.add(not.id)
+
+
+        repository.deleteAllById(idList)
+        println(idList.toString())
     }
 
     fun toModel(request: NotificationRequest): Notification {
@@ -107,12 +114,12 @@ class NotificationService(
             description = request.description,
             html = request.html,
             status = NotificationInfo(
-                parentId = null,
                 priority = request.priority,
                 active = request.active,
                 pinned = request.pinned ?: false,
                 author = request.author,
-                groups = request.groups
+                groups = request.groups,
+                parentId = null
             )
         )
     }

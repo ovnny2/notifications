@@ -12,11 +12,8 @@ import javax.transaction.Transactional
 import javax.validation.Valid
 
 @RestController
-class NotificationController(
-    val notificationService: NotificationService,
-) {
+class NotificationController(private val notificationService: NotificationService) {
 
-    @Transactional
     @PostMapping("/api/v1/notifications")
     fun createNotification(@RequestBody @Valid request: NotificationRequest): ResponseEntity<NotificationResponse> {
         val response = notificationService.createNotification(request)
@@ -40,9 +37,9 @@ class NotificationController(
     @PutMapping("/api/v1/notifications/{id}")
     fun updateNotification(
         @PathVariable(value = "id") @Valid id: String,
-        @RequestBody @Valid updates: NotificationRequest,
+        @RequestBody @Valid updates: NotificationRequest
     ): ResponseEntity<NotificationResponse?> {
-        return ResponseEntity.ok().body(notificationService.updateExistingNotification(id, updates))
+        return ResponseEntity.ok().body(notificationService.updateNotification(id, updates))
     }
 
     @Transactional
@@ -53,7 +50,9 @@ class NotificationController(
 
     @Transactional
     @DeleteMapping("/api/v1/notifications/{id}")
-    fun deleteNotification(@PathVariable(value = "id") @Valid id: String): ResponseEntity<String> {
+    fun deleteNotification(@PathVariable(value = "id") @Valid id: String): ResponseEntity<Unit> {
+        notificationService.deleteNotification(id)
+
         return ResponseEntity.status(HttpStatus.OK).build()
     }
 }
