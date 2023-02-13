@@ -30,29 +30,21 @@ class NotificationService(
         }
     }
 
-    fun getAllNotifications(): List<NotificationResponse> {
-        val notificationsList = repository.findAll() as List<Notification>
+    fun getAllNotifications(): List<NotificationResponse?> {
+        val notificationsList = repository.findAll()
         return notificationsList.map { toResponse(it) }
     }
 
     @Transactional
     fun notificationStateToggle(id: String): String {
 
-        val notification = repository.findById(id).orElseThrow {
-            NotificationNotFoundException(NotificationMessages.NOT_FOUND_MESSAGE.msg, HttpStatus.NOT_FOUND)
-        }
+        val notification = repository.findById(id)
 
-        val notificationUpdatedStatus = notification.status.copy(
-            active = !notification.status.active
-        )
+        notification.get().status.active = false
 
-        val newNotification = repository.save(
-            notification.copy(
-                status = notificationUpdatedStatus
-            )
-        )
+        repository.save(notification.get())
 
-        return when (newNotification.status.active) {
+        return when (notification.get().status.active) {
             true -> "A notificação foi ativada com sucesso"
             else -> "A notificação foi desativada com sucesso"
         }
@@ -89,23 +81,9 @@ class NotificationService(
 
     @Transactional
     fun deleteNotification(id: String) {
+        val notification = repository.findById(id).get()
 
-        val possibleChild = repository.findById(id).orElseThrow {
-            NotificationNotFoundException(
-                NotificationMessages.NOT_FOUND_MESSAGE.msg,
-                HttpStatus.NOT_FOUND
-            )
-        }
-
-        val idList = mutableListOf<String>()
-        idList.add(possibleChild.id)
-
-        val history = repository.findAllByStatusParentId(id)
-        for (not in history) idList.add(not.id)
-
-
-        repository.deleteAllById(idList)
-        println(idList.toString())
+        repository.delete(notification)
     }
 
     fun toModel(request: NotificationRequest): Notification {

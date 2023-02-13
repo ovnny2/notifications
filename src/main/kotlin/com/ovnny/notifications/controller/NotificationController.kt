@@ -12,7 +12,9 @@ import javax.transaction.Transactional
 import javax.validation.Valid
 
 @RestController
-class NotificationController(private val notificationService: NotificationService) {
+class NotificationController(
+    private val notificationService: NotificationService
+) {
 
     @PostMapping("/api/v1/notifications")
     fun createNotification(@RequestBody @Valid request: NotificationRequest): ResponseEntity<NotificationResponse> {

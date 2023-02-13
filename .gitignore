@@ -1,7 +1,6 @@
 README.md
 
 ### Intellij+all ###
-# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
 
 # User-specific stuff
 .idea/**/workspace.xml
@@ -30,17 +29,16 @@ README.md
 .idea/**/libraries
 
 # Gradle and Maven with auto-import
-# When using Gradle or Maven with auto-import, you should exclude module files,
-# since they will be recreated, and may cause churn.  Uncomment if using
-# auto-import.
-# .idea/artifacts
-# .idea/compiler.xml
-# .idea/jarRepositories.xml
-# .idea/modules.xml
-# .idea/*.iml
-# .idea/modules
-# *.iml
-# *.ipr
+since they will be recreated, and may cause churn.  Uncomment if using
+auto-import.
+.idea/artifacts
+.idea/compiler.xml
+.idea/jarRepositories.xml
+.idea/modules.xml
+.idea/*.iml
+.idea/modules
+*.iml
+*.ipr
 
 # CMake
 cmake-build-*/
@@ -78,9 +76,6 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 ### Intellij+all Patch ###
-# Ignore everything but code style settings and run configurations
-# that are supposed to be shared within teams.
-
 .idea/*
 
 !.idea/codeStyles
@@ -111,18 +106,6 @@ fabric.properties
 hs_err_pid*
 replay_pid*
 
-### Kotlin ###
-# Compiled class file
-
-# Log file
-
-# BlueJ files
-
-# Mobile Tools for Java (J2ME)
-
-# Package Files #
-
-
 ### Maven ###
 target/
 pom.xml.tag
@@ -135,7 +118,6 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 
-# Eclipse m2e generated files
 # Eclipse Core
 .project
 # JDT-specific (Eclipse Java Development Tools)
@@ -162,6 +144,10 @@ gradle-app.setting
 # Eclipse Core
 # JDT-specific (Eclipse Java Development Tools)
 
-### Gradle Patch ###
+# Gradle Patch
 # Java heap dump
 *.hprof
+
+# Arquivos de auxílio ao desenvolvimento e aprendizado
+src/main/resources/static/*
+./HELP.md

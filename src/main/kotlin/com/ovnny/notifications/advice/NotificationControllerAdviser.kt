@@ -1,4 +1,4 @@
-package com.ovnny.notifications.controller.advice
+package com.ovnny.notifications.advice
 
 import com.ovnny.notifications.exception.MessageError
 import com.ovnny.notifications.exception.NotificationConflitOnDeletionException
