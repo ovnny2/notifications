@@ -1,0 +1,11 @@
+server:
+  port: 8001
+
+spring:
+  application:
+    name: notifications
+  profiles:
+    active: develop
+  config:
+    import: optional:configserver:http://172.21.0.6:8888/
+    name: notifications
