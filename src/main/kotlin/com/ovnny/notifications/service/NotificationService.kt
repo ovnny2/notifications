@@ -1,7 +1,7 @@
 package com.ovnny.notifications.service
 
-import com.ovnny.notifications.exception.NotificationNotFoundException
 import com.ovnny.notifications.advice.msg.NotificationMessages
+import com.ovnny.notifications.exception.NotificationNotFoundException
 import com.ovnny.notifications.model.notification.Notification
 import com.ovnny.notifications.model.notification.NotificationInfo
 import com.ovnny.notifications.model.notification.NotificationRequest
@@ -9,7 +9,7 @@ import com.ovnny.notifications.model.notification.NotificationResponse
 import com.ovnny.notifications.repository.NotificationRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import javax.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class NotificationService(
