@@ -1,5 +1,7 @@
-FROM openjdk:alpine3.7
-WORKDIR /
-ARG JAR_FILE=build/libs/*-SNAPSHOT.jar
+FROM openjdk:17-alpine
+WORKDIR /app
+ARG JAR_FILE=/build/libs/*.jar
 COPY ${JAR_FILE} app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["java","-jar","/app/app.jar"]
+
+EXPOSE 8001
