@@ -1,15 +1,16 @@
 package com.ovnny.notifications
 
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories
 
+@EnableAutoConfiguration(exclude = [DataSourceAutoConfiguration::class])
 @EnableConfigurationProperties
-@EnableMongoRepositories
 @SpringBootApplication
 class Application
 
-fun main(args: Array<String>) {
-    runApplication<Application>(*args)
-}
+    fun main(args: Array<String>) {
+        runApplication<Application>(*args)
+    }
