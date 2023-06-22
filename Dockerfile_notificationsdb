@@ -1,0 +1,12 @@
+# Dockerfile
+FROM mongo:6.0
+
+WORKDIR /app
+
+CMD ["mongosh", "-u", "root", "-p", "root", "--authenticationDatabase", "admin", "notifications-db", "--eval", "db.createUser({ user: 'user1', pwd: 'user1', roles: [{ role: 'dbOwner', db: 'notifications-db' }] })"]
+
+# Expose MongoDB default port
+EXPOSE 27017
+
+# Start MongoDB with custom configuration and run the create-user.sh script
+CMD ["mongosh", "--host", "localhost"]
