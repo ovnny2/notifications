@@ -1,2 +1,2 @@
 #!/bin/sh
-mongosh -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase "admin" "$MONGO_INITDB_DATABASE" --eval "db.createUser({ user: '$MONGO_DB_USERNAME', pwd: '$MONGO_DB_PASSWORD', roles: [{ role: 'dbOwner', db: '$MONGO_INITDB_DATABASE' }] })"
+mongosh --bindIp "172.21.0.15" --host localhost -u "root" -p "root" --authenticationDatabase "admin" "notifications-db" --eval "db.createUser({ user: 'user1', pwd: 'user1', roles: [{ role: 'dbOwner', db: 'notifications-db' }] })"
