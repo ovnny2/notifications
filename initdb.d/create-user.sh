@@ -1,2 +1,0 @@
-#!/bin/sh
-mongosh --bindIp "172.21.0.15" --host localhost -u "root" -p "root" --authenticationDatabase "admin" "notifications-db" --eval "db.createUser({ user: 'user1', pwd: 'user1', roles: [{ role: 'dbOwner', db: 'notifications-db' }] })"
