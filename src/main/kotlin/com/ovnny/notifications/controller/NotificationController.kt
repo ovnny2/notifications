@@ -11,31 +11,32 @@ import java.net.URI
 import jakarta.validation.Valid
 
 @RestController
+@RequestMapping("/v1")
 class NotificationController(
-    private val notificationService: NotificationService,
+    private val notificationService: NotificationService
 ) {
 
-    @PostMapping("/api/v1/notifications")
+    @PostMapping("/notifications")
     fun createNotification(@RequestBody @Valid request: NotificationRequest): ResponseEntity<NotificationResponse> {
         val notification = notificationService.createNotification(request)
-        val location = URI.create("api/v1/notifications/${notification.id}")
+        val location = URI.create("api/notifications/${notification.id}")
 
         val response = notificationService.toResponse(notification)
         return ResponseEntity.created(location).body(response)
     }
 
-    @GetMapping("/api/v1/notifications/{id}")
-    fun getNotification(@PathVariable(value = "id") @Valid id: String): ResponseEntity<Notification> {
+    @GetMapping("/notifications/{id}")
+    fun getNotification(@PathVariable(value = "id") @Valid id: String): ResponseEntity<Notification?> {
         val notificationResponse = notificationService.getNotificationById(id)
         return ResponseEntity.ok().body(notificationResponse)
     }
 
-    @GetMapping("/api/v1/notifications")
+    @GetMapping("/notifications")
     fun getAllNotifications(): ResponseEntity<List<NotificationResponse?>> {
         return ResponseEntity.ok().body(notificationService.getAllNotifications())
     }
 
-    @PutMapping("/api/v1/notifications/{id}")
+    @PutMapping("/notifications/{id}")
     fun updateNotification(
         @PathVariable(value = "id") @Valid id: String,
         @RequestBody @Valid updates: NotificationRequest,
@@ -43,12 +44,12 @@ class NotificationController(
         return ResponseEntity.ok().body(notificationService.updateNotification(id, updates))
     }
 
-    @PatchMapping("/api/v1/notifications/{id}")
+    @PatchMapping("/notifications/{id}")
     fun toggleNotificationState(@PathVariable(value = "id") @Valid id: String): ResponseEntity<String> {
         return ResponseEntity.ok().body(notificationService.notificationStateToggle(id))
     }
 
-    @DeleteMapping("/api/v1/notifications/{id}")
+    @DeleteMapping("/notifications/{id}")
     fun deleteNotification(@PathVariable(value = "id") @Valid id: String): ResponseEntity<Unit> {
         notificationService.deleteNotification(id)
 

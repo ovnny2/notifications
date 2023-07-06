@@ -1,6 +1,5 @@
 package com.ovnny.notifications.service
 
-import com.ovnny.notifications.advice.msg.NotificationMessages
 import com.ovnny.notifications.exception.NotificationNotFoundException
 import com.ovnny.notifications.model.notification.Notification
 import com.ovnny.notifications.model.notification.NotificationInfo
@@ -25,9 +24,7 @@ class NotificationService(
     }
 
     fun getNotificationById(id: String): Notification {
-        return repository.findById(id).orElseThrow {
-            NotificationNotFoundException(NotificationMessages.NOT_FOUND_MESSAGE.msg, HttpStatus.NOT_FOUND)
-        }
+        return repository.findById(id).orElseThrow { NotificationNotFoundException(HttpStatus.NOT_FOUND) }
     }
 
     fun getAllNotifications(): List<NotificationResponse?> {
@@ -54,7 +51,7 @@ class NotificationService(
     fun updateNotification(id: String, updateRequest: NotificationRequest): NotificationResponse? {
 
         val original = repository.findById(id).orElseThrow {
-            NotificationNotFoundException(NotificationMessages.NOT_FOUND_MESSAGE.msg, HttpStatus.NOT_FOUND)
+            NotificationNotFoundException(HttpStatus.NOT_FOUND)
         }
 
         val updates = Notification(
@@ -81,7 +78,7 @@ class NotificationService(
 
     @Transactional
     fun deleteNotification(id: String) {
-        val notification = repository.findById(id).get()
+        val notification = getNotificationById(id)
 
         repository.delete(notification)
     }
