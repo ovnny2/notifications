@@ -30,6 +30,11 @@ class MongoConfig: AbstractMongoClientConfiguration() {
 
 
     @Bean
+    override fun mongoClient(): MongoClient {
+        return MongoClients.create(uri)
+    }
+
+    @Bean
     override fun getDatabaseName(): String {
         return database
     }
@@ -37,10 +42,5 @@ class MongoConfig: AbstractMongoClientConfiguration() {
     @Bean
     override fun getMappingBasePackages(): MutableCollection<String> {
         return arrayListOf("com.ovnny.notifications.model")
-    }
-
-    @Bean
-    override fun mongoClient(): MongoClient {
-        return MongoClients.create(uri)
     }
 }
