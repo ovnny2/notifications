@@ -12,6 +12,5 @@ data class NotificationResponse(
     val active: Boolean,
     val priority: String,
     val createdAt: LocalDateTime,
-    val lastUpdate: LocalDateTime,
-    val parentId: String?
+    val lastUpdate: LocalDateTime
 )

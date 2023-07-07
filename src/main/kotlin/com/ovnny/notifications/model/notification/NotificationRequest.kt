@@ -30,5 +30,5 @@ data class NotificationRequest(
     val priority: String,
 
     @get:NotEmpty
-    val groups: List<Groups>,
+    val groups: List<Groups>
 )

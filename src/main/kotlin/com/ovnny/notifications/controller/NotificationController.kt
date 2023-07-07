@@ -18,17 +18,17 @@ class NotificationController(
 
     @PostMapping("/notifications")
     fun createNotification(@RequestBody @Valid request: NotificationRequest): ResponseEntity<NotificationResponse> {
-        val notification = notificationService.createNotification(request)
-        val location = URI.create("api/notifications/${notification.id}")
+        val notification = notificationService.toModel(request)
+        val response = notificationService.createNotification(notification)
+        val location = URI.create("api/notifications/${response.id}")
 
-        val response = notificationService.toResponse(notification)
         return ResponseEntity.created(location).body(response)
     }
 
     @GetMapping("/notifications/{id}")
     fun getNotification(@PathVariable(value = "id") @Valid id: String): ResponseEntity<Notification?> {
-        val notificationResponse = notificationService.getNotificationById(id)
-        return ResponseEntity.ok().body(notificationResponse)
+        val notification = notificationService.getNotificationById(id)
+        return ResponseEntity.ok().body(notification)
     }
 
     @GetMapping("/notifications")
@@ -46,7 +46,7 @@ class NotificationController(
 
     @PatchMapping("/notifications/{id}")
     fun toggleNotificationState(@PathVariable(value = "id") @Valid id: String): ResponseEntity<String> {
-        return ResponseEntity.ok().body(notificationService.notificationStateToggle(id))
+        return ResponseEntity.ok().body(notificationService.toggleNotificationState(id))
     }
 
     @DeleteMapping("/notifications/{id}")

@@ -6,21 +6,23 @@ import com.ovnny.notifications.model.notification.NotificationInfo
 import com.ovnny.notifications.model.notification.NotificationRequest
 import com.ovnny.notifications.model.notification.NotificationResponse
 import com.ovnny.notifications.repository.NotificationRepository
+import org.springframework.context.MessageSource
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.*
 
 @Service
 class NotificationService(
-    private val repository: NotificationRepository
+    private val repository: NotificationRepository,
+    private val messageSource: MessageSource
 ) {
 
     @Transactional
-    fun createNotification(request: NotificationRequest): Notification {
-        val notification = toModel(request)
+    fun createNotification(notification: Notification): NotificationResponse {
         repository.save(notification)
 
-        return notification
+        return toResponse(notification)
     }
 
     fun getNotificationById(id: String): Notification {
@@ -33,44 +35,40 @@ class NotificationService(
     }
 
     @Transactional
-    fun notificationStateToggle(id: String): String {
+    fun toggleNotificationState(id: String): String {
+        val notification = getNotificationById(id)
+        notification.status.active = !notification.status.active
 
-        val notification = repository.findById(id)
+        repository.save(notification)
 
-        notification.get().status.active = false
-
-        repository.save(notification.get())
-
-        return when (notification.get().status.active) {
-            true -> "A notificação foi ativada com sucesso"
-            else -> "A notificação foi desativada com sucesso"
+        return when (notification.status.active) {
+            true -> messageSource.getMessage("ActiveNotification", arrayOf(notification.title), Locale("pt"))
+            else -> messageSource.getMessage("InactiveNotification", arrayOf(notification.title), Locale("pt"))
         }
     }
 
     @Transactional
     fun updateNotification(id: String, updateRequest: NotificationRequest): NotificationResponse? {
 
-        val original = repository.findById(id).orElseThrow {
-            NotificationNotFoundException(HttpStatus.NOT_FOUND)
-        }
+        val originalNotification = getNotificationById(id)
 
-        val updates = Notification(
+        val updates = originalNotification.copy(
             title = updateRequest.title,
             description = updateRequest.description,
             html = updateRequest.html,
             status = NotificationInfo(
                 author = updateRequest.author,
-                pinned = updateRequest.pinned!!,
+                pinned = updateRequest.pinned ?: originalNotification.status.pinned,
                 active = updateRequest.active,
                 priority = updateRequest.priority,
-                groups = updateRequest.groups,
-                parentId = id
+                groups = updateRequest.groups
             )
         )
 
-        original.status.active = false
+        originalNotification.status.active = false
+        originalNotification.status.pinned = false
 
-        repository.save(original)
+        repository.save(originalNotification)
         repository.save(updates)
 
         return toResponse(updates)
@@ -93,15 +91,14 @@ class NotificationService(
                 active = request.active,
                 pinned = request.pinned ?: false,
                 author = request.author,
-                groups = request.groups,
-                parentId = null
+                groups = request.groups
             )
         )
     }
 
     fun toResponse(notification: Notification): NotificationResponse {
         return NotificationResponse(
-            id = notification.id,
+            id = notification.id!!,
             title = notification.title,
             description = notification.description,
             html = notification.html,
@@ -110,8 +107,7 @@ class NotificationService(
             active = notification.status.active,
             priority = notification.status.priority,
             createdAt = notification.createdAt!!,
-            lastUpdate = notification.updatedAt!!,
-            parentId = notification.status.parentId
+            lastUpdate = notification.updatedAt!!
         )
     }
 }
