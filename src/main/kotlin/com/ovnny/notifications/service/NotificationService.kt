@@ -26,31 +26,39 @@ class NotificationService(
     }
 
     fun getNotificationById(id: String): Notification {
-        return repository.findById(id).orElseThrow { NotificationNotFoundException(HttpStatus.NOT_FOUND) }
+        return repository.findById(id)
+            .orElseThrow { NotificationNotFoundException(HttpStatus.NOT_FOUND) }
     }
 
     fun getAllNotifications(): List<NotificationResponse?> {
-        val notificationsList = repository.findAll()
-        return notificationsList.map { toResponse(it) }
+        val notifications = repository.findAll()
+
+        return notifications.map { toResponse(it) }
     }
 
     @Transactional
     fun toggleNotificationState(id: String): String {
-        val notification = getNotificationById(id)
+        val notification = repository.findById(id)
+            .orElseThrow { NotificationNotFoundException(HttpStatus.NOT_FOUND) }
+
         notification.status.active = !notification.status.active
 
         repository.save(notification)
 
         return when (notification.status.active) {
-            true -> messageSource.getMessage("ActiveNotification", arrayOf(notification.title), Locale("pt"))
-            else -> messageSource.getMessage("InactiveNotification", arrayOf(notification.title), Locale("pt"))
+            true -> messageSource.getMessage("ActiveNotification",
+                arrayOf(notification.title), Locale("pt"))
+
+            else -> messageSource.getMessage("InactiveNotification",
+                arrayOf(notification.title), Locale("pt"))
         }
     }
 
     @Transactional
     fun updateNotification(id: String, updateRequest: NotificationRequest): NotificationResponse? {
 
-        val originalNotification = getNotificationById(id)
+        val originalNotification = repository.findById(id)
+            .orElseThrow { NotificationNotFoundException(HttpStatus.NOT_FOUND) }
 
         val updates = originalNotification.copy(
             title = updateRequest.title,
@@ -66,7 +74,6 @@ class NotificationService(
         )
 
         originalNotification.status.active = false
-        originalNotification.status.pinned = false
 
         repository.save(originalNotification)
         repository.save(updates)
@@ -76,7 +83,8 @@ class NotificationService(
 
     @Transactional
     fun deleteNotification(id: String) {
-        val notification = getNotificationById(id)
+        val notification = repository.findById(id)
+            .orElseThrow { NotificationNotFoundException(HttpStatus.NOT_FOUND) }
 
         repository.delete(notification)
     }
