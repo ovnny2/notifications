@@ -1,4 +1,4 @@
-package com.ovnny.notifications.config
+package com.ovnny.notifications.config.network
 
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean

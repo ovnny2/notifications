@@ -1,4 +1,4 @@
-package com.ovnny.notifications.config
+package com.ovnny.notifications.config.dependecies
 
 import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients

@@ -1,4 +1,4 @@
-package com.ovnny.notifications.config
+package com.ovnny.notifications.config.dependecies
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
