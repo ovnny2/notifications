@@ -12,7 +12,7 @@ class MessageConfig {
     @Bean
     fun messageSource(): ResourceBundleMessageSource? {
         val source = ResourceBundleMessageSource()
-        source.setBasenames("messages/label")
+        source.setBasenames("messages/label_pt")
         source.setUseCodeAsDefaultMessage(true)
         return source
     }
