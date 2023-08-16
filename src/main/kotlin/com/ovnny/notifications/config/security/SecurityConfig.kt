@@ -14,15 +14,15 @@ import org.springframework.security.web.SecurityFilterChain
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
-    @Autowired private val resourceServer: OAuth2ResourceServer
+    @Autowired private val resourceServer: OAuth2ResourceServer,
 ) {
 
     @Bean
     @Throws(Exception::class)
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
 
+        http.csrf().disable()
         http.authorizeHttpRequests { request -> request.anyRequest().authenticated() }
-
         http.oauth2ResourceServer { obj: OAuth2ResourceServerConfigurer<HttpSecurity?> -> obj.jwt() }
 
         return http.build()
